@@ -256,7 +256,7 @@ for node in $(${KUBECTL} get nodes | sed '1d' | awk '{print $1}'); do
   ${KUBECTL} annotate node "${node}" "kind.x-k8s.io/registry=localhost:${reg_port}";
 done
 
-READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c -F '^Ready$') || true
+READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c '^Ready$') || true
 while [[ ${READY_NODES} -lt ${num_nodes} ]]; do
   echo "${READY_NODES}/${num_nodes} ready. waiting..."
   sleep 3s
