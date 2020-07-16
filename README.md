@@ -6,8 +6,8 @@ The script requires presence of docker.
 the following steps are done when a test cluster is created:
 
 1. the script first downloads kind and kubectl (if not present)
-2. starts a local registry 
-3. creates a kind cluster that is connected to the local registry.
+2. starts a local docker registry 
+3. creates a kind cluster that is connected to the local docker registry.
 4. script waits for all nodes to become ready
 
 Here is the command line of this programm:
