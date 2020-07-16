@@ -3,8 +3,12 @@ This script sets up a k8s test cluster for test purposes, it uses the [kind](htt
 
 The script requires presence of docker.
 
-It first downloads kind and kubectl,
-starts a local registry and then creates a kind cluster that is connected to the local registry.
+the following steps are done when a test cluster is created:
+
+1. the script first downloads kind and kubectl (if not present)
+2. starts a local registry 
+3. creates a kind cluster that is connected to the local registry.
+4. script waits for all nodes to become ready
 
 Here is the command line of this programm:
 
