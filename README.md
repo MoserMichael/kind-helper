@@ -1,16 +1,16 @@
 
-This script sets up a k8s test cluster for test purposes, it uses the [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) utility.
+This [kind\_helper.py](https://github.com/MoserMichael/kind-helper/blob/master/kind_helper.py) script sets up a k8s test cluster for test purposes, it uses the [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) utility.
 
-Example usage is in the test for this project (main test script: [test.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test.sh) see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
-
-The script requires presence of docker.
-
-the following steps are done when a test cluster is created:
+the following steps are done when creating a test cluster:
 
 1. the script first downloads kind and kubectl (if not present)
 2. starts a local docker registry 
 3. creates a kind cluster that is connected to the local docker registry.
 4. script waits for all nodes to become ready
+
+The kind\_helper.py script requires presence of docker and python3.
+
+Example usage is in the test for this project (main test script: [test.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test.sh) see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
 
 Here is the command line of this programm:
 
