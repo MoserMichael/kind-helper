@@ -227,7 +227,7 @@ set -e
 running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
 if [ "${running}" != 'true' ]; then
   docker run \
-    -d --restart=always -p "${reg_port}" --name "${reg_name}" \
+      -d --restart=always -p ${reg_port}:${reg_port} --name ${reg_name} \
     registry:2
 fi
 
@@ -293,9 +293,13 @@ def stop_cluster_imp(cmd_args):
 ${KIND} delete cluster
 
 REG=$(docker ps -a | grep registry:2[[:space:]] | awk '{ print $1 }')
-docker stop $REG
-docker rm $REG
-docker network rm kind
+if [[ $REG != "" ]]; then
+    docker stop $REG
+    docker rm $REG
+    docker network rm kind
+else
+    echo "local registry already stopped"
+fi
 '''
 
     bashcmd = "/bin/bash"
@@ -313,6 +317,17 @@ docker network rm kind
 def stop_cluster(cmd_args):
     check_prerequisites(cmd_args)
     stop_cluster_imp(cmd_args)
+
+#def use_image(cmd_args):
+#    check_prerequisites(cmd_args)
+#
+#    cmd = '{} load docker-image {}'.format(os.environ["KIND"], cmd_args.image)
+#    run_start = RunCommand(cmd, None, True)
+#    if run_start.exit_code == 0:
+#        print("*** image imported ***")
+#    else:
+#        show_error("Failed to import image to kind cluster: {}".format(run_start.make_error_message()))
+#
 
 def parse_cmd_line():
     usage = '''
@@ -348,7 +363,7 @@ It runs a local docker registry and can be used
     dir_opt = group.add_argument('--dir', '-d', type=str, dest='temp_dir', default="$HOME/tmp-dir",\
             help='if kind or kubectl tools not found then try to download to this directory')
 
-    group.add_argument('--plat', '-t', type=str, dest='platform', default="amd64", \
+    plat_opt = group.add_argument('--plat', '-t', type=str, dest='platform', default="amd64", \
             help='platform id for downloading kind and curl (if needed)')
 
     verbose_opt = group.add_argument('--verbose', '-v', action='store_true', default=False, \
@@ -361,12 +376,23 @@ It runs a local docker registry and can be used
 
     # that's the trick for having the same option in two groups
     group._group_actions.append(dir_opt)
+    group._group_actions.append(plat_opt)
     group._group_actions.append(verbose_opt)
+
+    group = parse.add_argument_group("add docker image to cluster")
+
+#    group.add_argument('--image', '-i', type=str, dest='image', default="",\
+#            help='load docker image so that it is accessible from kind cluster')
+#
+#
+#    # that's the trick for having the same option in two groups
+#    group._group_actions.append(dir_opt)
+#    group._group_actions.append(plat_opt)
+#    group._group_actions.append(verbose_opt)
+#
 
 
     return parse.parse_args(), parse
-
-
 
 def main():
     cmd_args, cmd_parser = parse_cmd_line()
@@ -375,6 +401,8 @@ def main():
         start_cluster(cmd_args)
     elif cmd_args.isstop:
         stop_cluster(cmd_args)
+#    elif cmd_args.image != "":
+#        use_image(cmd_args)
     else:
         cmd_parser.print_help()
 

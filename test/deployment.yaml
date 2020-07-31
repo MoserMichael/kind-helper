@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-echo-server 
+  namespace: default 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: test-echo-server 
+  template:
+    metadata:
+      labels:
+        name: test-echo-server 
+    spec:
+      serviceAccountName: test-echo-server 
+      containers:
+        - name: test-echo-server 
+          # Replace this with the built image name
+          image: localhost:PORTNUM/kind-test-pod:latest
+          imagePullPolicy: Always
+ 

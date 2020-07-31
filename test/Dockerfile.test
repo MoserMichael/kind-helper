@@ -1,0 +1,8 @@
+FROM alpine:3.10.0
+
+COPY test/echo.py /
+
+RUN apk --no-cache add python3 
+
+ENTRYPOINT [ "/usr/bin/python3", "/echo.py" ]
+
