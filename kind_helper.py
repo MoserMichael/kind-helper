@@ -9,6 +9,13 @@ import subprocess
 import shlex
 import sys
 import stat
+import re
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 
 KIND_DOWNLOAD_LOCATION = "https://api.github.com/repos/kubernetes-sigs/kind/releases/latest"
 LATEST_K8S_VERSION = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
@@ -205,7 +212,7 @@ def check_prerequisites(cmd_args):
     os.environ["KIND"] = kind
 
 
-def run_cluster(cmd_args):
+def run_cluster(cmd_args, ingress_options):
 
     os.environ["reg_name"] = cmd_args.reg_docker_name
     os.environ["reg_port"] = str(cmd_args.reg_docker_port)
@@ -218,8 +225,16 @@ def run_cluster(cmd_args):
     for _ in range(0, cmd_args.num_masters):
         node_def += "- role: control-plane\n"
 
-    script_start = '''
+    script_ingress_map = ""
+    for ingress_option in ingress_options:
+        script_ingress_map += '''
+  - containerPort: {}
+    hostPort: {}
+    protocol: TCP
+'''.format(ingress_option[1], ingress_option[0])
 
+
+    script_fragments = [ r'''
 set -e
 
 # create registry container unless it already exists
@@ -235,14 +250,20 @@ fi
 cat <<EOF | ${KIND} create cluster --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-'''
-
-    script_end = '''
 containerdConfigPatches:
-- |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
-    endpoint = ["http://${reg_name}:${reg_port}"]
+- "[plugins.\"io.containerd.grpc.v1.cri\".registry.mirrors.\"localhost:${reg_port}\"]\n  endpoint = [\"http://${reg_name}:${reg_port}\"]"
+nodes:
+''', \
+'''
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+''', \
+'''
 EOF
 
 docker network connect "kind" "${reg_name}"
@@ -260,14 +281,45 @@ while [[ ${READY_NODES} -lt ${num_nodes} ]]; do
   sleep 3s
   READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c '^Ready$') || true
 done
-
-echo "*** kind cluster running, all nodes are ready ***"
+''', \
 '''
-    script = script_start + node_def  + script_end
+WORKER_NODE_NAME=$(${KUBECTL} get nodes | sed '1d' |grep -v master | head -1 | awk '{ print $1 }')
+
+if [[ ${WORKER_NODE_NAME} == "" ]]; then
+    echo "Error: need to define at least one worker node for hosting the ingress"
+    exit 1
+fi
+
+${KUBECTL} label node ${WORKER_NODE_NAME} "ingress-ready=true"
+
+# init nginx ingress
+${KUBECTL} apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+
+${KUBECTL} wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+''',
+'''
+echo "*** kind cluster running, all nodes are ready ***"
+''' ]
+
+
+    script = script_fragments[0] + node_def 
+
+    if script_ingress_map != "":
+        script += script_fragments[1] + script_ingress_map
+
+    script += script_fragments[2]
+
+    if script_ingress_map != "":
+        script += script_fragments[3] 
+
+    script += script_fragments[4]
 
     bashcmd = "/bin/bash"
     if cmd_args.verbose:
-        #print("script: {}".format(script))
+        print(r'<script>\n{}\n</script>'.format(script))
         bashcmd += " -x"
 
     run_start = RunCommand(bashcmd, script, False)
@@ -277,10 +329,28 @@ echo "*** kind cluster running, all nodes are ready ***"
         show_error("Failed to run cluster: {}".format(run_start.make_error_message()))
 
 
+def parse_ingress_options(cmd_args):
+
+    ingress_def = []
+    if isinstance(cmd_args.ingress, Iterable):
+        for port_def in cmd_args.ingress:
+            match = re.search(r'^(\d+):(\d+)$', port_def)
+            if match:
+                external_port = match.group(1)
+                internal_port = match.group(2)
+                ingress_def.append((external_port, internal_port))
+            else:
+                print('-i option argument should be of the following form:\
+<positive integer>:<positive integer>. is: {}'.format(port_def))
+
+                sys.exit(1)
+    return ingress_def
+
 
 def start_cluster(cmd_args):
+    ingress_options = parse_ingress_options(cmd_args)
     check_prerequisites(cmd_args)
-    run_cluster(cmd_args)
+    run_cluster(cmd_args, ingress_options)
 
 def stop_cluster_imp(cmd_args):
     os.environ["reg_name"] = cmd_args.reg_docker_name
@@ -326,7 +396,8 @@ def stop_cluster(cmd_args):
 #    if run_start.exit_code == 0:
 #        print("*** image imported ***")
 #    else:
-#        show_error("Failed to import image to kind cluster: {}".format(run_start.make_error_message()))
+#        show_error("Failed to import image to kind cluster: {}".\
+#           format(run_start.make_error_message()))
 #
 
 def parse_cmd_line():
@@ -353,12 +424,18 @@ It runs a local docker registry and can be used
     group.add_argument('--workers', '-w', type=int, default=0, dest='num_workers',\
             help='number of worker nodes')
 
-    group.add_argument('--registry-port', '-p', type=int, default=8000,\
+    group.add_argument('--registry-port', '-p', type=int, default=5000,\
             dest='reg_docker_port',\
             help='number of docker registery port')
 
     group.add_argument('--registry-name', '-n', type=str, default="kind-registry", \
             dest='reg_docker_name', help='docker registery name')
+
+    group.add_argument('--ingress', '-i', type=str, nargs='+', default="",\
+            dest='ingress',\
+            help='create an ingress with the test cluster if present.\
+Add multiple values of the following form <external-port>:<internal-port;\
+first is the port visible from outside the cluster, second is the port inside the cluster')
 
     dir_opt = group.add_argument('--dir', '-d', type=str, dest='temp_dir', default="$HOME/tmp-dir",\
             help='if kind or kubectl tools not found then try to download to this directory')
