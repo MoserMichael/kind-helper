@@ -3,7 +3,7 @@
 
 The main deliverable of this project is the [kind\_helper.py](https://github.com/MoserMichael/kind-helper/blob/master/kind_helper.py) script, this script sets up a kubernetes test cluster for test purposes; it uses the [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) utility.
 
-With a kubernetes cluster created by kind you can have any number of nodes that are run on the same machine; the resource consumption is not very high and the cluster starts up quickly; It creates a reasonable kubernetes test cluster that can be used in automated tests. The kind tool is a bit difficult to use at times, therefore the kind\_helper.py script is designed to simplify the process of setting up/tearing down of a test cluster with kind.
+With a kubernetes cluster created by kind you can have any number of nodes that are run on the same machine; Each node of the cluster is hosted by a separate docker container; The resource consumption is therefore not very high and the cluster starts up quickly; It creates a reasonable kubernetes test cluster that can be used in automated tests. The kind tool is a bit difficult to use at times, therefore the kind\_helper.py script is designed to simplify the process of setting up/tearing down of a test cluster with kind.
 
 # What it does
 
