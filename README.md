@@ -1,6 +1,8 @@
 
 This script sets up a k8s test cluster for test purposes, it uses the [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) utility.
 
+Example usage is in the test for this project (main test script: [test.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test.sh) see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
+
 The script requires presence of docker.
 
 the following steps are done when a test cluster is created:
@@ -13,7 +15,6 @@ the following steps are done when a test cluster is created:
 Here is the command line of this programm:
 
 ```
-./kind_helper.py -h
 usage: kind_helper.py [-h] [--start] [--masters NUM_MASTERS]
                       [--workers NUM_WORKERS]
                       [--registry-port REG_DOCKER_PORT]
@@ -51,6 +52,9 @@ Stop the cluster:
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
                         download to this directory (default: $HOME/tmp-dir)
+  --plat PLATFORM, -t PLATFORM
+                        platform id for downloading kind and curl (if needed)
+                        (default: amd64)
   --verbose, -v         verbose output (default: False)
 
 ```
