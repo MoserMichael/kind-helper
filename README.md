@@ -1,11 +1,11 @@
 
-# Introduction
+## Introduction
 
 The main deliverable of this project is the [kind\_helper.py](https://github.com/MoserMichael/kind-helper/blob/master/kind_helper.py) script, this script sets up a kubernetes test cluster for test purposes; it uses the [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) utility.
 
 With a kubernetes cluster created by kind you can have any number of nodes that are run on the same machine; Each node of the cluster is hosted by a separate docker container; The resource consumption is therefore not very high and the cluster starts up quickly; It creates a reasonable kubernetes test cluster that can be used in automated tests. The kind tool is a bit difficult to use at times, therefore the kind\_helper.py script is designed to simplify the process of setting up/tearing down of a test cluster with kind.
 
-# What it does
+## What it does
 
 the following steps are done when creating a test cluster:
 
@@ -21,14 +21,14 @@ The kind\_helper.py script requires the presence of docker and python3.
 
 Examples are in the test for this project 
 
-1. basic test without ingress [test\_basic.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_basic.sh) 
-2. test with ingress [test\_with\_ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_with_ingress.sh)  
+1. basic test without ingress [test-basic.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-basic.sh) 
+2. test with ingress [test-with-ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-with-ingress.sh)  
 
 Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
 
 `make test` will run all the tests.
 
-# Command line reference
+## Command line reference
 
 Here is the command line of this program:
 
