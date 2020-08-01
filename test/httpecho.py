@@ -3,14 +3,16 @@ import http.server
 import socketserver
 import urllib.parse
 import datetime
+import logging
 
-HTTP_LISTEN_PORT=8000
+HTTP_LISTEN_PORT=8001
 
 class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
 
-        print("get path {}".format(self.path))
+        #print("get path {}".format(self.path))
+
         # Construct a server response.
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -29,7 +31,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 url_parsed.query)
 
         self.wfile.write(msg.encode('utf-8'))
-
+        logging.info("request: path {} params {}".format(url_parsed.path, url_parsed.query))
+ 
 
 class TCPServer(socketserver.TCPServer):
     # Allow to restart the mock server without needing to wait for the socket
@@ -37,7 +40,17 @@ class TCPServer(socketserver.TCPServer):
     # some workflows
     allow_reuse_address = True
 
+def set_info_logger():
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    file_handler = logging.FileHandler("gh.log")
+    root.addHandler(file_handler)
 
+    console_handler = logging.StreamHandler()
+    root.addHandler(console_handler)
+
+
+set_info_logger()
 print('Server listening on port 8000 {}'.format(HTTP_LISTEN_PORT))
 httpd = TCPServer(('', HTTP_LISTEN_PORT), Handler)
 httpd.serve_forever()

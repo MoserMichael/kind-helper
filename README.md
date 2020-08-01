@@ -13,10 +13,16 @@ the following steps are done when creating a test cluster:
 2. starts a local docker registry 
 3. creates a kind cluster with desired number of master and worker nodes that is connected to the local docker registry.
 4. script waits for all nodes to become ready
+5. If option -i requests to create an ingress, then create the ingress on start the load balancer on the first worker node (requires to have at least one worker node in the cluster)
 
-The kind\_helper.py script requires presence of docker and python3.
+The kind\_helper.py script requires the presence of docker and python3.
 
-Example usage is in the test for this project (main test script: [test.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test.sh) see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
+Example usage is in the test for this project 
+
+1. basic test without ingress [test\_basic.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_basic.sh) 
+2. test with ingress [test\_with\_ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_with_ingress.sh)  
+
+Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
 
 # Command line reference
 
@@ -24,9 +30,10 @@ Here is the command line of this programm:
 
 ```
 usage: kind_helper.py [-h] [--start] [--masters NUM_MASTERS]
-                      [--workers NUM_WORKERS]
+                      [--workers NUM_WORKERS] [--timeout TIMEOUT]
                       [--registry-port REG_DOCKER_PORT]
-                      [--registry-name REG_DOCKER_NAME] [--dir TEMP_DIR]
+                      [--registry-name REG_DOCKER_NAME]
+                      [--ingress INGRESS [INGRESS ...]] [--dir TEMP_DIR]
                       [--plat PLATFORM] [--verbose] [--stop]
 
 This program automates creation of useful k8s clusters by means of utilising
@@ -42,14 +49,23 @@ Start the cluster:
                         number of master nodes (default: 3)
   --workers NUM_WORKERS, -w NUM_WORKERS
                         number of worker nodes (default: 0)
+  --timeout TIMEOUT, -t TIMEOUT
+                        timeout while waiting for nodes to become ready
+                        (default: 120)
   --registry-port REG_DOCKER_PORT, -p REG_DOCKER_PORT
-                        number of docker registery port (default: 8000)
+                        number of docker registery port (default: 5000)
   --registry-name REG_DOCKER_NAME, -n REG_DOCKER_NAME
                         docker registery name (default: kind-registry)
+  --ingress INGRESS [INGRESS ...], -i INGRESS [INGRESS ...]
+                        create an ingress with the test cluster if present.Add
+                        multiple values of the following form <external-
+                        port>:<internal-port;first is the port visible from
+                        outside the cluster, second is the port inside the
+                        cluster (default: )
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
                         download to this directory (default: $HOME/tmp-dir)
-  --plat PLATFORM, -t PLATFORM
+  --plat PLATFORM, -l PLATFORM
                         platform id for downloading kind and curl (if needed)
                         (default: amd64)
   --verbose, -v         verbose output (default: False)
@@ -60,10 +76,8 @@ Stop the cluster:
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
                         download to this directory (default: $HOME/tmp-dir)
-  --plat PLATFORM, -t PLATFORM
+  --plat PLATFORM, -l PLATFORM
                         platform id for downloading kind and curl (if needed)
                         (default: amd64)
-  --verbose, -v         verbose output (default: False)
-
-```
+  --verbose, -v         verbose output (default: False)```
 

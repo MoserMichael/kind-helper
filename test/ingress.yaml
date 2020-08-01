@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-echo-server 
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /test-echo-server
+        backend:
+          serviceName: test-echo-server 
+          servicePort: 8001

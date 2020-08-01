@@ -217,24 +217,42 @@ def run_cluster(cmd_args, ingress_options):
     os.environ["reg_name"] = cmd_args.reg_docker_name
     os.environ["reg_port"] = str(cmd_args.reg_docker_port)
     os.environ["num_nodes"] = str(cmd_args.num_workers + cmd_args.num_masters)
+    os.environ["wait_for_nodes_timeout"] = str(cmd_args.timeout)
 
-    node_def = ""
-    for _ in range(0, cmd_args.num_workers):
-        node_def += "- role: worker\n"
+    script_ingress_map = '' 
 
-    for _ in range(0, cmd_args.num_masters):
-        node_def += "- role: control-plane\n"
-
-    script_ingress_map = ""
-    for ingress_option in ingress_options:
-        script_ingress_map += '''
+    if len(ingress_options) != 0:
+        script_ingress_map =  '''
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+        authorization-mode: "AlwaysAllow"
+  extraPortMappings:
+'''
+        for ingress_option in ingress_options:
+            script_ingress_map += '''
   - containerPort: {}
     hostPort: {}
     protocol: TCP
 '''.format(ingress_option[1], ingress_option[0])
 
 
-    script_fragments = [ r'''
+    node_def = ""
+    first_worker = True
+    for _ in range(0, cmd_args.num_workers):
+        node_def += "- role: worker\n"
+        if first_worker:
+            node_def += script_ingress_map
+        first_worker = False
+
+    for _ in range(0, cmd_args.num_masters):
+        node_def += "- role: control-plane\n" 
+
+
+    script_fragments = [r'''
 set -e
 
 # create registry container unless it already exists
@@ -255,15 +273,6 @@ containerdConfigPatches:
 nodes:
 ''', \
 '''
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
-  extraPortMappings:
-''', \
-'''
 EOF
 
 docker network connect "kind" "${reg_name}"
@@ -276,7 +285,16 @@ for node in $(${KUBECTL} get nodes | sed '1d' | awk '{print $1}'); do
 done
 
 READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c '^Ready$') || true
+
+DEADLINE=$(date +%s)
+DEADLINE=$((DEADLINE + wait_for_nodes_timeout))
+
 while [[ ${READY_NODES} -lt ${num_nodes} ]]; do
+  TIME_NOW=$(date +%s)
+  if (( TIME_NOW > DEADLINE )); then
+    echo "timed out waiting for nodes to become ready"
+    exit 1
+  fi
   echo "${READY_NODES}/${num_nodes} ready. waiting..."
   sleep 3s
   READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c '^Ready$') || true
@@ -289,33 +307,33 @@ if [[ ${WORKER_NODE_NAME} == "" ]]; then
     echo "Error: need to define at least one worker node for hosting the ingress"
     exit 1
 fi
-
 ${KUBECTL} label node ${WORKER_NODE_NAME} "ingress-ready=true"
 
-# init nginx ingress
+echo "initialize nginx ingress"
 ${KUBECTL} apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
 
 ${KUBECTL} wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
-''',
+  --timeout=120s
+
+
+#echo "initialize contour ingress"
+#${KUBECTL} apply -f https://projectcontour.io/quickstart/contour.yaml
+#${KUBECTL} patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+#
+''',\
 '''
 echo "*** kind cluster running, all nodes are ready ***"
-''' ]
+''']
 
 
-    script = script_fragments[0] + node_def 
-
-    if script_ingress_map != "":
-        script += script_fragments[1] + script_ingress_map
-
-    script += script_fragments[2]
+    script = script_fragments[0] + node_def + script_fragments[1]
 
     if script_ingress_map != "":
-        script += script_fragments[3] 
+        script += script_fragments[2]
 
-    script += script_fragments[4]
+    script += script_fragments[3]
 
     bashcmd = "/bin/bash"
     if cmd_args.verbose:
@@ -424,12 +442,16 @@ It runs a local docker registry and can be used
     group.add_argument('--workers', '-w', type=int, default=0, dest='num_workers',\
             help='number of worker nodes')
 
+    group.add_argument('--timeout', '-t', type=int, default="120", \
+            dest='timeout', help='timeout while waiting for nodes to become ready')
+
     group.add_argument('--registry-port', '-p', type=int, default=5000,\
             dest='reg_docker_port',\
             help='number of docker registery port')
 
     group.add_argument('--registry-name', '-n', type=str, default="kind-registry", \
             dest='reg_docker_name', help='docker registery name')
+
 
     group.add_argument('--ingress', '-i', type=str, nargs='+', default="",\
             dest='ingress',\
@@ -440,7 +462,7 @@ first is the port visible from outside the cluster, second is the port inside th
     dir_opt = group.add_argument('--dir', '-d', type=str, dest='temp_dir', default="$HOME/tmp-dir",\
             help='if kind or kubectl tools not found then try to download to this directory')
 
-    plat_opt = group.add_argument('--plat', '-t', type=str, dest='platform', default="amd64", \
+    plat_opt = group.add_argument('--plat', '-l', type=str, dest='platform', default="amd64", \
             help='platform id for downloading kind and curl (if needed)')
 
     verbose_opt = group.add_argument('--verbose', '-v', action='store_true', default=False, \

@@ -1,0 +1,12 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: test-echo-server 
+spec:
+  selector:
+    name: test-echo-server 
+  ports:
+  # Default port used by the image
+  - port: 8001
+    targetPort: 8001
