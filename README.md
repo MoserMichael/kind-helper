@@ -22,7 +22,8 @@ The kind\_helper.py script requires the presence of docker and python3.
 Examples are in the test for this project 
 
 1. basic test without ingress [test-basic.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-basic.sh) 
-2. test with ingress [test-with-ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-with-ingress.sh)  
+ creates a cluster; builds a docker image, puts it into the local registry; runs a deployment in the cluster that accesses the image in the local registry.
+2. test with ingress [test-with-ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-with-ingress.sh)  same as (1), adds creation of an ingress to the cluster; registers a service and ingress object that access an http server in the running pod; sends http request to the installation and checks that you get the expected response.
 
 Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
 
