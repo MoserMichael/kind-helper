@@ -13,20 +13,24 @@ the following steps are done when creating a test cluster:
 2. starts a local docker registry 
 3. creates a kind cluster with desired number of master and worker nodes that is connected to the local docker registry.
 4. script waits for all nodes to become ready
-5. If option -i requests to create an ingress, then create the ingress on start the load balancer on the first worker node (requires to have at least one worker node in the cluster)
+5. If option -i requests to create an ingress, then create the ingress and start the nginx load balancer on the first worker node (requires to have at least one worker node in the cluster)
 
 The kind\_helper.py script requires the presence of docker and python3.
 
-Example usage is in the test for this project 
+## Example usage 
+
+Examples are in the test for this project 
 
 1. basic test without ingress [test\_basic.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_basic.sh) 
 2. test with ingress [test\_with\_ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test_with_ingress.sh)  
 
 Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) directory)
 
+`make test` will run all the tests.
+
 # Command line reference
 
-Here is the command line of this programm:
+Here is the command line of this program:
 
 ```
 usage: kind_helper.py [-h] [--start] [--masters NUM_MASTERS]
