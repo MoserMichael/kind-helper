@@ -3,6 +3,7 @@
 set -ex
 
 REGISTRY_PORT=5000
+EXTERNAL_PORT=8001
 
 # comment this to keep the cluster running on completion.
 STOP_CLUSTER_ON_EXIT=1
@@ -32,10 +33,10 @@ find_kubectl() {
 # start the test cluster (3 workers, 3 masters)
 
 # short options:
-#./kind_helper.py -s -w 3 -i 80:80 -v -t 120  -p ${REGISTRY_PORT}
+#./kind_helper.py -s -w 3 -i ${EXTERNAL_PORT}:80 -v -t 120  -p ${REGISTRY_PORT}
 
 # the same with long options
-./kind_helper.py --start --workers 3 --timeout 120 --ingress 80:80 --verbose --registry-port ${REGISTRY_PORT}
+./kind_helper.py --start --workers 3 --timeout 120 --ingress ${EXTERNAL_PORT}:80 --verbose --registry-port ${REGISTRY_PORT}
 
 cleanup() {
     # kill the cluster on exit
@@ -113,7 +114,7 @@ done
 
 ${KUBECTL} get ingresses test-echo-server -n default -o yaml
 
-RESPONSE=$(curl  http://localhost:80/test-echo-server)
+RESPONSE=$(curl  http://localhost:${EXTERNAL_PORT}/test-echo-server)
 
 echo "${RESPONSE}"
 
