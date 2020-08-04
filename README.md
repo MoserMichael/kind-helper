@@ -86,3 +86,12 @@ Stop the cluster:
                         (default: amd64)
   --verbose, -v         verbose output (default: False)```
 
+
+## What I learned from this
+
+doing docker based workflows can take quite a lot of time; i often need to try out stuff; now every iteration of the process takes quite a while, as it involves a combination of steps where each step takes quite a while: building the docker, building the cluster, trying things out on the cluster. One solution to this problem is not to rely on autmation too much here - each step needs to be debugged on its own, without relying on the whole sequence of steps. (O(n^2) versus o(n))
+
+Local docker registrys using registry:2 have a lot of strange issues: i managed to push a docker image of the form aa/bb/cc:latest to the local registry on localhost:5000/dd:latest but not a docker image of the form aa/bb:latest
+
+Also in kubernetes you really have to take care of annotations; a service object has an annotation in its spec, and expects all pods connected to the service to have that same annotation; likewise there are some annotatins involved with ingresses; etc.
+ All that required some head banging on my part, for a while.
