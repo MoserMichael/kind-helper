@@ -85,7 +85,7 @@ Stop the cluster:
                         platform id for downloading kind and curl (if needed)
                         (default: amd64)
   --verbose, -v         verbose output (default: False)```
-
+```
 
 ## What I learned from this
 
