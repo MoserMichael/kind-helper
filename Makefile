@@ -11,4 +11,4 @@ test-with-ingress-tls:
 	./test/test-with-ingress-tls.sh 2>&1 | tee test-with-ingress-tls.log
 
 
-.PHONY: test test-basic test-with-ingress
+.PHONY: test test-basic test-with-ingress test-with-ingress-tls
