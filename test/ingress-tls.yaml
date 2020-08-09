@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-echo-server 
+spec:
+  tls:
+  - hosts:
+      - localhost
+    secretName: ingress-secret-cert
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /test-echo-server
+        backend:
+          serviceName: test-echo-server 
+          servicePort: 8001
