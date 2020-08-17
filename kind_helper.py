@@ -335,7 +335,7 @@ echo "*** kind cluster running, all nodes are ready ***"
 
     script += script_fragments[3]
 
-    bashcmd = "/bin/bash"
+    bashcmd = "/usr/bin/env bash"
     if cmd_args.verbose:
         print(r'<script>\n{}\n</script>'.format(script))
         bashcmd += " -x"
@@ -390,7 +390,7 @@ else
 fi
 '''
 
-    bashcmd = "/bin/bash"
+    bashcmd = "/usr/bin/env bash"
     if cmd_args.verbose:
         #print("script: {}".format(script))
         bashcmd += " -x"
