@@ -5,6 +5,8 @@ The main deliverable of this project is the [kind\_helper.py](https://github.com
 
 With a kubernetes cluster created by kind you can have any number of nodes that are run on the same machine; Each node of the cluster is hosted by a separate docker container; The resource consumption is therefore not very high and the cluster starts up quickly; It creates a reasonable kubernetes test cluster that can be used in automated tests. The kind tool is a bit difficult to use at times, therefore the kind\_helper.py script is designed to simplify the process of setting up/tearing down of a test cluster.
 
+The number 'nodes' in the kind cluster is limited by the amount of available RAM. I didn't find any clear memory requirements for a node, so that I can't enforce any memory requirements in the script.
+
 ## What it does
 
 The following steps are done by kind\_helper.py when creating a test cluster:
