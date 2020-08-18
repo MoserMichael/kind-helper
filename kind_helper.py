@@ -210,6 +210,7 @@ def check_prerequisites(cmd_args):
 
     os.environ["KUBECTL"] = kubectl
     os.environ["KIND"] = kind
+    os.environ["KIND_DIR"] = cmd_args.temp_dir
 
 
 def run_cluster(cmd_args, ingress_options):
@@ -274,6 +275,10 @@ nodes:
 ''', \
 '''
 EOF
+
+${KIND} get kubeconfig >${KIND_DIR}/kubeconfig
+
+KUBECTL="$KUBECTL --kubeconfig ${KIND_DIR}/kubeconfig "
 
 docker network connect "kind" "${reg_name}"
 
@@ -490,8 +495,41 @@ first is the port visible from outside the cluster, second is the port inside th
 #    group._group_actions.append(verbose_opt)
 #
 
+    group = parse.add_argument_group("get shell to node")
 
+    group.add_argument('--node', '-e', type=str, dest='node', default="",\
+            help='run shell in kind cluster node with this name')
+ 
+    group = parse.add_argument_group("kubectl wrapper - run kubectl on kind cluster")
+ 
+    group.add_argument('--kubectl', '-c', type=str, dest='kubectl', default="",\
+            help='value of options is a command line that is passed to kubectl with kind cluster config')
+
+    # that's the trick for having the same option in two groups
+    group._group_actions.append(dir_opt)
+ 
     return parse.parse_args(), parse
+
+def run_shell(node_name):
+    command_line = "docker exec -it {} /bin/bash".format(node_name)
+
+    process = subprocess.Popen(shlex.split(command_line))
+    process.communicate()
+
+def run_kubectl(cmd_args):
+    has_kubectl = has_command("kubectl")
+    if not has_kubectl:
+        kubectl = "{}/kubectl".format(cmd_args.temp_dir)
+    else:
+        kubectl = "kubectl"
+
+    command_line = "{} --kubeconfig {}/kubeconfig {}". \
+            format(os.path.expandvars(kubectl), os.path.expandvars(cmd_args.temp_dir), cmd_args.kubectl)
+    print(command_line)
+    process = subprocess.Popen(shlex.split(command_line))
+    process.communicate()
+
+
 
 def main():
     cmd_args, cmd_parser = parse_cmd_line()
@@ -500,6 +538,10 @@ def main():
         start_cluster(cmd_args)
     elif cmd_args.isstop:
         stop_cluster(cmd_args)
+    elif cmd_args.node != "":
+        run_shell(cmd_args.node)
+    elif cmd_args.kubectl != "":
+        run_kubectl(cmd_args);
 #    elif cmd_args.image != "":
 #        use_image(cmd_args)
     else:
