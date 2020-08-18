@@ -108,8 +108,9 @@ kubectl wrapper - run kubectl on kind cluster:
                         kubectl with kind cluster config (default: )
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
-                        download to this directory (default: $HOME/tmp-dir)```
+                        download to this directory (default: $HOME/tmp-dir)
 ```
+
 ## What I learned from this
 
 doing docker based workflows can take quite a lot of time; i often need to try out stuff; now every iteration of the process takes quite a while, as it involves a combination of steps where each step takes quite a while: building the docker, building the cluster, trying things out on the cluster. One solution to this problem is not to rely on automation too much here - each step needs to be debugged on its own, without relying on the whole sequence of steps. (O(n^2) versus o(n)). Now with kubernetes you have an additional problem: often it is not obvious that an action failed or succeeded; you have to examine all of the effected kubernetes objects and their logs...
