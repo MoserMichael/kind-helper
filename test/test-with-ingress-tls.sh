@@ -17,19 +17,6 @@ docker_tag() {
 	docker push $to
 }
 
-find_kubectl() {
-    set +e
-    KUBECTL=$(which kubectl)
-    STAT=$?
-    set -e
-
-    if [[ $STAT != 0 ]]; then
-        # kubectl if not in path than kind_helper downloaded it into defaultl location
-        KUBECTL=$HOME/tmp-dir/kubectl
-    fi
-
-}
-
 # start the test cluster (3 workers, 3 masters)
 
 # short options:
@@ -48,11 +35,10 @@ cleanup() {
 trap "cleanup" EXIT SIGINT
 
 
-find_kubectl
 
 # check if the nodes are up and ready
 
-NODES=$(${KUBECTL} get nodes)
+NODES=$(./kind_helper.py -c 'get nodes')
 
 READY_NODES=$(echo "$NODES" | grep -c Ready)
 if [[ $READY_NODES != 6 ]]; then
@@ -87,7 +73,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ${KEY_FILE} -out ${C
 # create secret object that refers to certificate
 SECRET_NAME=ingress-secret-cert
 
-kubectl create secret tls ${SECRET_NAME} --key ${KEY_FILE} --cert ${CERT_FILE}
+./kind_helper.py -c "create secret tls ${SECRET_NAME} --key ${KEY_FILE} --cert ${CERT_FILE}"
 
 # build image for test pod
 docker build -f test/Dockerfile.test -t aaa/mm/kind-test-pod .
@@ -99,24 +85,24 @@ docker_tag aaa/mm/kind-test-pod localhost:${REGISTRY_PORT}/kind-test-pod
 sed -e s/PORTNUM/${REGISTRY_PORT}/ test/deployment.yaml >test/deployment-port.yaml
 
 # create pod in registry that refers to kind registry
-${KUBECTL} create -f test/service_account.yaml
-${KUBECTL} create -f test/role.yaml  
-${KUBECTL} create -f test/role_binding.yaml  
-${KUBECTL} create -f test/deployment-port.yaml 
-${KUBECTL} create -f test/service.yaml  
-${KUBECTL} create -f test/ingress-tls.yaml  
+./kind_helper.py -c 'create -f test/service_account.yaml'
+./kind_helper.py -c 'create -f test/role.yaml'
+./kind_helper.py -c 'create -f test/role_binding.yaml'
+./kind_helper.py -c 'create -f test/deployment-port.yaml'
+./kind_helper.py -c 'create -f test/service.yaml'
+./kind_helper.py -c 'create -f test/ingress-tls.yaml'
 
-${KUBECTL} wait -f test/deployment.yaml --for condition=available
+./kind_helper.py -c 'wait -f test/deployment.yaml --for condition=available'
 
 echo "*** deployment available ***"
 
-${KUBECTL} get pods -o wide
+./kind_helper.py -c 'get pods -o wide'
 
 
 echo "*** wait for ingress object to be active (be attached to load balancer) ***"
 
 while [[ true ]]; do
-    HAS_LB=$(${KUBECTL} get ingresses test-echo-server -n default -o json | jq .status.loadBalancer.ingress)
+    HAS_LB=$(./kind_helper.py -c 'get ingresses test-echo-server -n default -o json' | jq .status.loadBalancer.ingress)
     echo "${HAS_LB}"
     if [[ $HAS_LB != "null" ]] && [[ $HAS_LB != "{}" ]]; then
       break
@@ -124,7 +110,7 @@ while [[ true ]]; do
     sleep 3
 done
 
-${KUBECTL} get ingresses test-echo-server -n default -o yaml
+./kind_helper.py -c 'get ingresses test-echo-server -n default -o yaml'
 
 RESPONSE=$(curl -k -v https://localhost:${EXTERNAL_PORT}/test-echo-server)
 
