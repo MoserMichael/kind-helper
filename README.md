@@ -14,12 +14,18 @@ The following steps are done by kind\_helper.py when creating a test cluster:
 1. the script first downloads kind and kubectl (if these are not present in the path)
 2. starts a local docker registry 
 3. creates a kind cluster with desired number of master and worker nodes that is connected to the local docker registry. Any docker image pushed to this registry is available from within the test cluster.
-4. script waits for all nodes to become ready
-5. If command line option --ingress option is present, then create the ingress deployment and start the nginx load balancer on the first worker node (requires to have at least one worker node in the cluster). 
+4. download kubeconfig for working with kind cluster
+5. script waits for all nodes to become ready
+6. If command line option --ingress option is present, then create the ingress deployment and start the nginx load balancer on the first worker node (requires to have at least one worker node in the cluster). 
 
 The kind\_helper.py script requires the presence of docker and python3.
 
 ## Example usage 
+
+* Start a kind cluster with 1 master node and 3 worker nodes; local registry of cluster starts at port 5000 ```./kind_helper.py --start --workers 3 --master 1 --verbose  --registry-port 5000```
+* Run the kubectl command 'kubectl get nodes' with the kind clusters context ```./kind_helper.py -c 'get nodes'```
+* run a shell on node kind-control-plane of the cluster ```./kind_helper.py --node kind-control-plane```
+* stop the cluster & local registry ```./kind_helper.py --stop```
 
 Examples are in the test for this project 
 
@@ -33,6 +39,7 @@ Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) d
 
 `make test` will run all the tests.
 
+
 ## Command line reference
 
 Here is the command line of this program:
@@ -43,7 +50,8 @@ usage: kind_helper.py [-h] [--start] [--masters NUM_MASTERS]
                       [--registry-port REG_DOCKER_PORT]
                       [--registry-name REG_DOCKER_NAME]
                       [--ingress INGRESS [INGRESS ...]] [--dir TEMP_DIR]
-                      [--plat PLATFORM] [--verbose] [--stop]
+                      [--plat PLATFORM] [--verbose] [--stop] [--node NODE]
+                      [--kubectl KUBECTL]
 
 This program automates creation of useful k8s clusters by means of utilising
 the kind utility. It runs a local docker registry and can be used
@@ -88,8 +96,19 @@ Stop the cluster:
   --plat PLATFORM, -l PLATFORM
                         platform id for downloading kind and curl (if needed)
                         (default: amd64)
-  --verbose, -v         verbose output (default: False)```
-```
+  --verbose, -v         verbose output (default: False)
+
+get shell to node:
+  --node NODE, -e NODE  run shell in kind cluster node with this name
+                        (default: )
+
+kubectl wrapper - run kubectl on kind cluster:
+  --kubectl KUBECTL, -c KUBECTL
+                        value of options is a command line that is passed to
+                        kubectl with kind cluster config (default: )
+  --dir TEMP_DIR, -d TEMP_DIR
+                        if kind or kubectl tools not found then try to
+                        download to this directory (default: $HOME/tmp-dir)```
 
 ## What I learned from this
 
