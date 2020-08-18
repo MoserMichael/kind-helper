@@ -185,14 +185,13 @@ def check_prerequisites(cmd_args):
     has_kind = has_command("kind")
     has_kubectl = has_command("kubectl")
 
-    if not has_kind or not has_kubectl:
-        cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
-        dir_check = pathlib.Path(cmd_args.temp_dir)
-        if not dir_check.is_dir():
-            try:
-                os.makedirs(cmd_args.temp_dir, 0o755)
-            except OSError:
-                show_error("can't create temp directory {}".format(cmd_args.temp_dir))
+    cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
+    dir_check = pathlib.Path(cmd_args.temp_dir)
+    if not dir_check.is_dir():
+        try:
+            os.makedirs(cmd_args.temp_dir, 0o755)
+        except OSError:
+            show_error("can't create temp directory {}".format(cmd_args.temp_dir))
 
     if not has_kind:
         kind = "{}/kind".format(cmd_args.temp_dir)
@@ -525,7 +524,6 @@ def run_kubectl(cmd_args):
 
     command_line = "{} --kubeconfig {}/kubeconfig {}". \
             format(os.path.expandvars(kubectl), os.path.expandvars(cmd_args.temp_dir), cmd_args.kubectl)
-    print(command_line)
     process = subprocess.Popen(shlex.split(command_line))
     process.communicate()
 
