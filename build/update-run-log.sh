@@ -1,7 +1,10 @@
 #!/bin/bash
 
-set -ex
+set -x
 
+sudo apt-get install expect
+
+set -ex
 
 if [[ -z $GITHUB_TOKEN ]]; then
     echo "token does not exist, can't upload"
