@@ -16,5 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: make
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make test
  
