@@ -2,7 +2,6 @@
 
 set -ex
 
-cd / 
 
 if [[ -z $GITHUB_TOKEN ]]; then
     echo "token does not exist, can't upload"
