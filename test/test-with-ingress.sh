@@ -90,6 +90,7 @@ echo "*** deployment available ***"
 
 echo "*** wait for ingress object to be active (be attached to load balancer) ***"
 
+COUNT=0
 while [[ true ]]; do
 
     ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
@@ -100,6 +101,12 @@ while [[ true ]]; do
       break
     fi
     sleep 3
+
+    if [[ $COUNT -gt 200 ]]; then
+        echo "waiting too long for ingress to be available, exit with error..."
+        exit 1
+    fi
+    ((COUNT+=1))
 done
 
 ./kind_helper.py -c 'get ingresses test-echo-server -n default -o yaml'
