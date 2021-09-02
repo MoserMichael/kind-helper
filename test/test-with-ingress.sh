@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -ex
+export PS4='+($(date +%H:%M:%S) ${BASH_SOURCE}:${LINENO})' 
 
 REGISTRY_PORT=5000
 EXTERNAL_PORT=8001

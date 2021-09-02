@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -ex
-
+export PS4='+($(date +%H:%M:%S) ${BASH_SOURCE}:${LINENO})' 
 REGISTRY_PORT=5000
 
 # comment thist to keep the cluster running on completion.
