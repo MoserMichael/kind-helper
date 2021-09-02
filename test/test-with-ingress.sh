@@ -91,6 +91,9 @@ echo "*** deployment available ***"
 echo "*** wait for ingress object to be active (be attached to load balancer) ***"
 
 while [[ true ]]; do
+
+    ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
+
     HAS_LB=$(./kind_helper.py -c 'get ingresses test-echo-server -n default -o json' | jq .status.loadBalancer.ingress)
     echo "${HAS_LB}"
     if [[ $HAS_LB != "null" ]] && [[ $HAS_LB != "{}" ]]; then
