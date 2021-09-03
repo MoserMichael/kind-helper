@@ -93,7 +93,6 @@ echo "*** wait for ingress object to be active (be attached to load balancer) **
 COUNT=0
 while [[ true ]]; do
 
-    ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
 
     HAS_LB=$(./kind_helper.py -c 'get ingresses test-echo-server -n default -o json' | jq .status.loadBalancer.ingress)
     echo "${HAS_LB}"
@@ -103,6 +102,8 @@ while [[ true ]]; do
     sleep 3
 
     if [[ $COUNT -gt 200 ]]; then
+        ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
+
         echo "waiting too long for ingress to be available, exit with error..."
         exit 1
     fi
