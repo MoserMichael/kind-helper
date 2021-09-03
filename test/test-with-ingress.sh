@@ -2,6 +2,7 @@
 
 set -ex
 export PS4='+($(date +%H:%M:%S) ${BASH_SOURCE}:${LINENO})' 
+command 2>&1 | tee ./test-with-ingress.log
 
 REGISTRY_PORT=5000
 EXTERNAL_PORT=8001
@@ -102,9 +103,9 @@ while [[ true ]]; do
     sleep 3
 
     if [[ $COUNT -gt 200 ]]; then
-        ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
-
         echo "waiting too long for ingress to be available, exit with error..."
+        ./kind_helper.py -c 'get ingresses test-echo-server -n default -o json'
+        ./kind_helper.py -c 'get get pods -n default'
         exit 1
     fi
     ((COUNT+=1))
