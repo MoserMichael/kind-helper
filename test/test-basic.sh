@@ -2,8 +2,7 @@
 
 set -ex
 export PS4='+($(date +%H:%M:%S) ${BASH_SOURCE}:${LINENO})' 
-
-command 2>&1 | tee ./test-basic.log
+exec &> >(tee ./test-basic.log)
 
 REGISTRY_PORT=5000
 

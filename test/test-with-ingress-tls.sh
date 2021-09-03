@@ -2,7 +2,7 @@
 
 set -ex
 export PS4='+($(date +%H:%M:%S) ${BASH_SOURCE}:${LINENO})' 
-command 2>&1 | tee ./test-with-ingress-tls.log
+exec &> >(tee ./test-with-ingress-tls.log)
 
 REGISTRY_PORT=5000
 EXTERNAL_PORT=8001
