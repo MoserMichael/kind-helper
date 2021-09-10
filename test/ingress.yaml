@@ -6,7 +6,10 @@ spec:
   rules:
   - http:
       paths:
-      - path: /test-echo-server
+      - pathType: Prefix
+        path: /test-echo-server
         backend:
-          serviceName: test-echo-server 
-          servicePort: 8001
+          service:
+            name: test-echo-server 
+            port: 
+              number: 8001
