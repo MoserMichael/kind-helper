@@ -29,7 +29,7 @@ docker_tag() {
 
 cleanup() {
     echo "*** cleanup ***"
-    ./kind_helper.py -c 'kubectl get events'
+    ./kind_helper.py -c 'get events'
 
     # kill the cluster on exit
     if [[ $STOP_CLUSTER_ON_EXIT != "" ]]; then
