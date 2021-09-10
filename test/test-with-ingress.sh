@@ -31,6 +31,7 @@ docker_tag() {
 cleanup() {
     echo "*** cleanup ***"
     ./kind_helper.py -c 'get events'
+    ./kind_helper.py -c 'get events -n default'
 
     # kill the cluster on exit
     if [[ $STOP_CLUSTER_ON_EXIT != "" ]]; then
