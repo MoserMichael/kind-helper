@@ -28,6 +28,9 @@ docker_tag() {
 ./kind_helper.py --start --workers 3 --verbose  --registry-port ${REGISTRY_PORT}
 
 cleanup() {
+    echo "*** cleanup ***"
+    ./kind_helper.py -c 'kubectl get events'
+
     # kill the cluster on exit
     if [[ $STOP_CLUSTER_ON_EXIT != "" ]]; then
         ./kind_helper.py --stop
