@@ -29,9 +29,9 @@ docker_tag() {
 
 cleanup() {
     echo "*** cleanup ***"
+    set +e
     ./kind_helper.py -c 'get events'
     ./kind_helper.py -c 'get ing'
-    ./kind_helper.py -c 'get pods'
     ./kind_helper.py -c 'get deployment'
 
     ./kind_helper.py -c 'get ing test-echo-server'
@@ -39,6 +39,12 @@ cleanup() {
     ./kind_helper.py -c 'get deployment test-echo-server'
     ./kind_helper.py -c 'get pods -l test-echo-server'
     ./kind_helper.py -c 'get logs -l test-echo-server'
+
+    for n in $(./kind_helper.py -c 'get ns' | grep Active |  awk '{print $1;}'); do
+        echo "namespace $n"
+        ./kind_helper.py -c 'get pods -n '$n
+    done
+
 
     # kill the cluster on exit
     if [[ $STOP_CLUSTER_ON_EXIT != "" ]]; then
