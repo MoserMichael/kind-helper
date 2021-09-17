@@ -43,7 +43,13 @@ cleanup() {
     for n in $(./kind_helper.py -c 'get ns' | grep Active |  awk '{print $1;}'); do
         echo "namespace $n"
         ./kind_helper.py -c 'get pods -n '$n
-    done
+        if [[ $n == "default" ]] || [[ $n == "ingress-nginx" ]]; then
+
+            for p in $(./kind_helper.py -c "get pods -n $n -o jsonpath=\"{range .items[*]}{' '}{.metadata.name}{end}\""); do
+                ./kind_helper.py -c "describe pod -n $n $p"
+            done
+        fi
+     done
 
 
     # kill the cluster on exit
