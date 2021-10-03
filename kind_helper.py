@@ -526,6 +526,8 @@ def run_kubectl(cmd_args):
             format(os.path.expandvars(kubectl), os.path.expandvars(cmd_args.temp_dir), cmd_args.kubectl)
     process = subprocess.Popen(shlex.split(command_line))
     process.communicate()
+    exit_code = process.wait()
+    sys.exit(exit_code)
 
 
 
