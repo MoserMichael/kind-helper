@@ -229,7 +229,6 @@ def run_cluster(cmd_args, ingress_options):
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "ingress-ready=true"
-        authorization-mode: "AlwaysAllow"
   extraPortMappings:
 '''
         for ingress_option in ingress_options:
@@ -319,7 +318,7 @@ ${KUBECTL} apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/m
 ${KUBECTL} wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
-  --timeout=120s
+  --timeout=180s
 
 
 #echo "initialize contour ingress"
