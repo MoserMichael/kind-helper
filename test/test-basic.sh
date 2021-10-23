@@ -18,7 +18,6 @@ docker_tag() {
 	docker push $to
 }
 
-
 # start the test cluster (3 workers, 3 masters)
 
 # short options:
