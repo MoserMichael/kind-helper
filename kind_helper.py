@@ -5,6 +5,7 @@ import urllib.request
 import json
 import os
 import pathlib
+import platform
 import subprocess
 import shlex
 import sys
@@ -16,15 +17,22 @@ try:
 except ImportError:
     from collections import Iterable
 
+SYSTEM=platform.system().lower()
 
 KIND_DOWNLOAD_LOCATION = "https://api.github.com/repos/kubernetes-sigs/kind/releases/latest"
 LATEST_K8S_VERSION = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
 KUBECTL_LOCATION = \
-        "https://storage.googleapis.com/kubernetes-release/release/{}/bin/linux/{}/kubectl"
+        "https://storage.googleapis.com/kubernetes-release/release/{}/bin/" + SYSTEM + "/{}/kubectl"
 
 def show_error(msg):
     print("Error {}".format(msg))
     sys.exit(1)
+
+def show_script(script):
+    line_num=1
+    for line in script.splitlines():
+        print(f"{line_num} {line}")
+        line_num += 1
 
 class RunCommand:
     def __init__(self, command_line, pipe_as_input=None, capture_stdout=True):
@@ -146,7 +154,7 @@ def download_kind(local_file, platform):
     if assets is None:
         show_error("Can't get kind download url - unexpected format of json")
     for asset in assets:
-        kind_platform = "kind-linux-{}".format(platform)
+        kind_platform = "kind-" + SYSTEM + "-{}".format(platform)
         name = asset.get("name")
         if name is None:
             show_error("Can't get kind download url - unexpected format of json (2)")
@@ -183,6 +191,7 @@ def check_prerequisites(cmd_args):
         show_error("can't find docker in the current path. please install docker")
 
     has_kind = has_command("kind")
+    print(f"has_kind {has_kind}")
     has_kubectl = has_command("kubectl")
 
     cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
@@ -340,7 +349,7 @@ echo "*** kind cluster running, all nodes are ready ***"
 
     bashcmd = "/usr/bin/env bash"
     if cmd_args.verbose:
-        print(r'<script>\n{}\n</script>'.format(script))
+        show_script(script)
         bashcmd += " -x"
 
     run_start = RunCommand(bashcmd, script, False)
