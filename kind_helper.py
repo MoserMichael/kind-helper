@@ -191,7 +191,6 @@ def check_prerequisites(cmd_args):
         show_error("can't find docker in the current path. please install docker")
 
     has_kind = has_command("kind")
-    print(f"has_kind {has_kind}")
     has_kubectl = has_command("kubectl")
 
     cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
