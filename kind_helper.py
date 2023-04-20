@@ -42,8 +42,6 @@ class RunCommand:
 
     def run(self, command_line, pipe_as_input, capture_stdout):
 
-        print(f"Run: {command_line}")
-
         try:
             if pipe_as_input is None:
                 process = subprocess.Popen(shlex.split(command_line), \
@@ -74,13 +72,17 @@ class RunCommand:
 
                 self.exit_code = process.wait()
 
-            print(f"status: {self.exit_code}")
+            if self.exit_code != 0:
+                print(f"Run: {command_line}")
+                print(f"status: {self.exit_code}")
             return self.exit_code
         except FileNotFoundError:
             self.output = ""
             self.error_out = "file not found"
             self.exit_code = 1
-            print(f"status: {self.exit_code}")
+            if self.exit_code != 0:
+                print(f"Run: {command_line}")
+                print(f"status: {self.exit_code}")
             return self.exit_code
 
     def result(self):
@@ -401,7 +403,7 @@ def stop_cluster_imp(cmd_args):
 
     script = '''
 
-    set -e
+    set -ex
 
 ${KIND} delete cluster
 
