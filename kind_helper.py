@@ -105,7 +105,7 @@ def has_command(file):
 
 
 def has_kubectl_check():
-    cmd = "kubectl config show"
+    cmd = "kubectl config view"
     cmd_runner = RunCommand(cmd)
     if cmd_runner.exit_code == 0:
         return True
