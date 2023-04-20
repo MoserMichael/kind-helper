@@ -24,7 +24,7 @@ docker_tag() {
 #./kind_helper.py -s -w 3 -v  -p ${REGISTRY_PORT}
 
 # the same with long options
-./kind_helper.py --verbose --start --workers 3 --verbose  --registry-port ${REGISTRY_PORT}
+./kind_helper.py --start --workers 3 --verbose  --registry-port ${REGISTRY_PORT}
 
 cleanup() {
     echo "*** cleanup ***"

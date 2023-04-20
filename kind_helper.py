@@ -41,6 +41,9 @@ class RunCommand:
         self.run(command_line, pipe_as_input, capture_stdout)
 
     def run(self, command_line, pipe_as_input, capture_stdout):
+
+        print(f"Run: {command_line}")
+
         try:
             if pipe_as_input is None:
                 process = subprocess.Popen(shlex.split(command_line), \
@@ -71,12 +74,13 @@ class RunCommand:
 
                 self.exit_code = process.wait()
 
-
+            print(f"status: {self.exit_code}")
             return self.exit_code
         except FileNotFoundError:
             self.output = ""
             self.error_out = "file not found"
             self.exit_code = 1
+            print(f"status: {self.exit_code}")
             return self.exit_code
 
     def result(self):
@@ -98,6 +102,15 @@ def has_command(file):
     if cmd_runner.exit_code == 0:
         return True
     return False
+
+
+def has_kubectl_check():
+    cmd = "kubectl config show"
+    cmd_runner = RunCommand(cmd)
+    if cmd_runner.exit_code == 0:
+        return True
+    return False
+
 
 def is_exe(localfile):
     file_check = pathlib.Path(localfile)
@@ -191,15 +204,15 @@ def check_prerequisites(cmd_args):
         show_error("can't find docker in the current path. please install docker")
 
     has_kind = has_command("kind")
-    has_kubectl = has_command("kubectl")
+    has_kubectl = has_kubectl_check() 
 
     cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
     dir_check = pathlib.Path(cmd_args.temp_dir)
     if not dir_check.is_dir():
         try:
             os.makedirs(cmd_args.temp_dir, 0o755)
-        except OSError:
-            show_error("can't create temp directory {}".format(cmd_args.temp_dir))
+        except OSError as err:
+            show_error("can't create temp directory {} error: {}".format(cmd_args.temp_dir, err))
 
     if not has_kind:
         kind = "{}/kind".format(cmd_args.temp_dir)
@@ -260,7 +273,7 @@ def run_cluster(cmd_args, ingress_options):
 
 
     script_fragments = [r'''
-set -e
+set -xe
 
 # create registry container unless it already exists
 
@@ -281,6 +294,7 @@ nodes:
 ''', \
 '''
 EOF
+
 
 ${KIND} get kubeconfig >${KIND_DIR}/kubeconfig
 
@@ -307,7 +321,7 @@ while [[ ${READY_NODES} -lt ${num_nodes} ]]; do
     exit 1
   fi
   echo "${READY_NODES}/${num_nodes} ready. waiting..."
-  sleep 3s
+  sleep 3
   READY_NODES=$(${KUBECTL} get nodes | awk '{ print $2 }' | grep -c '^Ready$') || true
 done
 ''', \
@@ -470,7 +484,7 @@ It runs a local docker registry and can be used
 Add multiple values of the following form <external-port>:<internal-port;\
 first is the port visible from outside the cluster, second is the port inside the cluster')
 
-    dir_opt = group.add_argument('--dir', '-d', type=str, dest='temp_dir', default="$HOME/tmp-dir",\
+    dir_opt = group.add_argument('--dir', '-d', type=str, dest='temp_dir', default="$HOME/kind-tmp-dir",\
             help='if kind or kubectl tools not found then try to download to this directory')
 
     plat_opt = group.add_argument('--plat', '-l', type=str, dest='platform', default="amd64", \
