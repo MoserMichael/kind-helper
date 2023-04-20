@@ -537,7 +537,7 @@ def run_shell(node_name):
     process.communicate()
 
 def run_kubectl(cmd_args):
-    has_kubectl = has_command("kubectl")
+    has_kubectl = has_kubectl_check()
     if not has_kubectl:
         kubectl = "{}/kubectl".format(cmd_args.temp_dir)
     else:
