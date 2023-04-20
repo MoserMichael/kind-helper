@@ -20,6 +20,12 @@ The following steps are done by kind\_helper.py when creating a test cluster:
 
 The kind\_helper.py script requires the presence of docker and python3.
 
+## setup 
+
+Requires ```python3``` and ```docker``` to be installed. 
+
+```kubectl``` and ```kind``` are downloaded by the script, if not present.
+
 ## Example usage 
 
 * Start a kind cluster with 1 master node and 3 worker nodes; local registry of cluster starts at port 5000 ```./kind_helper.py --start --workers 3 --master 1 --verbose  --registry-port 5000```
