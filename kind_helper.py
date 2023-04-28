@@ -304,6 +304,20 @@ KUBECTL="$KUBECTL --kubeconfig ${KIND_DIR}/kubeconfig "
 
 docker network connect "kind" "${reg_name}"
 
+# Document the local registry
+# https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-registry-hosting
+  namespace: kube-public
+data:
+  localRegistryHosting.v1: |
+    host: "localhost:${reg_port}"
+    help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
+EOF
+
 # tell https://tilt.dev to use the registry
 # https://docs.tilt.dev/choosing_clusters.html#discovering-the-registry
 #for node in $(${KIND} get nodes); do
@@ -337,7 +351,7 @@ fi
 ${KUBECTL} label node ${WORKER_NODE_NAME} "ingress-ready=true"
 
 echo "initialize nginx ingress"
-${KUBECTL} apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+${KUBECTL} apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
 ${KUBECTL} wait --namespace ingress-nginx \
   --for=condition=ready pod \
