@@ -206,7 +206,7 @@ def check_prerequisites(cmd_args):
         show_error("can't find docker in the current path. please install docker")
 
     has_kind = has_command("kind")
-    has_kubectl = has_kubectl_check() 
+    has_kubectl = has_kubectl_check()
 
     cmd_args.temp_dir = os.path.expandvars(cmd_args.temp_dir)
     dir_check = pathlib.Path(cmd_args.temp_dir)
@@ -242,7 +242,7 @@ def run_cluster(cmd_args, ingress_options):
     os.environ["num_nodes"] = str(cmd_args.num_workers + cmd_args.num_masters)
     os.environ["wait_for_nodes_timeout"] = str(cmd_args.timeout)
 
-    script_ingress_map = '' 
+    script_ingress_map = ''
 
     if len(ingress_options) != 0:
         script_ingress_map =  '''
@@ -263,15 +263,14 @@ def run_cluster(cmd_args, ingress_options):
 
 
     node_def = ""
-    first_worker = True
+    for _ in range(0, cmd_args.num_masters):
+        node_def += "- role: control-plane\n"
+        node_def += script_ingress_map
+
     for _ in range(0, cmd_args.num_workers):
         node_def += "- role: worker\n"
-        if first_worker:
-            node_def += script_ingress_map
-        first_worker = False
 
-    for _ in range(0, cmd_args.num_masters):
-        node_def += "- role: control-plane\n" 
+    node_def += script_ingress_map
 
 
     script_fragments = [r'''
@@ -535,15 +534,15 @@ first is the port visible from outside the cluster, second is the port inside th
 
     group.add_argument('--node', '-e', type=str, dest='node', default="",\
             help='run shell in kind cluster node with this name')
- 
+
     group = parse.add_argument_group("kubectl wrapper - run kubectl on kind cluster")
- 
+
     group.add_argument('--kubectl', '-c', type=str, dest='kubectl', default="",\
             help='value of options is a command line that is passed to kubectl with kind cluster config')
 
     # that's the trick for having the same option in two groups
     group._group_actions.append(dir_opt)
- 
+
     return parse.parse_args(), parse
 
 def run_shell(node_name):
