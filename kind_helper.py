@@ -72,17 +72,17 @@ class RunCommand:
 
                 self.exit_code = process.wait()
 
-            if self.exit_code != 0:
-                print(f"Run: {command_line}")
-                print(f"status: {self.exit_code}")
+            #if self.exit_code != 0:
+            #    print(f"Run: {command_line}")
+            #    print(f"status: {self.exit_code}")
             return self.exit_code
         except FileNotFoundError:
             self.output = ""
             self.error_out = "file not found"
             self.exit_code = 1
-            if self.exit_code != 0:
-                print(f"Run: {command_line}")
-                print(f"status: {self.exit_code}")
+            #if self.exit_code != 0:
+            #    print(f"Run: {command_line}")
+            #    print(f"status: {self.exit_code}")
             return self.exit_code
 
     def result(self):
@@ -261,18 +261,29 @@ def run_cluster(cmd_args, ingress_options):
     protocol: TCP
 '''.format(ingress_option[1], ingress_option[0])
 
-
     node_def = ""
+
+    first = True
     for _ in range(0, cmd_args.num_masters):
         node_def += "- role: control-plane\n"
-        node_def += script_ingress_map
+        if first:
+            node_def += script_ingress_map
+            first = False    
 
     for _ in range(0, cmd_args.num_workers):
         node_def += "- role: worker\n"
 
-    node_def += script_ingress_map
 
-
+#    first_worker = True
+#    for _ in range(0, cmd_args.num_workers):
+#        node_def += "- role: worker\n"
+#        if first_worker:
+#            node_def += script_ingress_map
+#        first_worker = False
+#
+#    for _ in range(0, cmd_args.num_masters):
+#        node_def += "- role: control-plane\n"
+#
     script_fragments = [r'''
 set -xe
 
@@ -305,7 +316,7 @@ docker network connect "kind" "${reg_name}"
 
 # Document the local registry
 # https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
-cat <<EOF | kubectl apply -f -
+cat <<EOF | ${KUBECTL} apply -f -
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -413,6 +424,8 @@ def start_cluster(cmd_args):
 def stop_cluster_imp(cmd_args):
     os.environ["reg_name"] = cmd_args.reg_docker_name
     os.environ["reg_port"] = str(cmd_args.reg_docker_port)
+
+    check_prerequisites(cmd_args)
 
     script = '''
 

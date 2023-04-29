@@ -26,7 +26,7 @@ docker_tag() {
 #./kind_helper.py -s -w 3 -i ${EXTERNAL_PORT}:80 -v -t 120  -p ${REGISTRY_PORT}
 
 # the same with long options
-./kind_helper.py --start --workers 3 --timeout 120 --ingress ${EXTERNAL_PORT}:80 --verbose --registry-port ${REGISTRY_PORT}
+./kind_helper.py --start --masters 1 --workers 3 --timeout 120 --ingress ${EXTERNAL_PORT}:80 --verbose --registry-port ${REGISTRY_PORT}
 
 cleanup() {
     echo "*** cleanup ***"
@@ -67,7 +67,7 @@ trap "cleanup" EXIT SIGINT
 NODES=$(./kind_helper.py -c 'get nodes')
 
 READY_NODES=$(echo "$NODES" | grep -c Ready)
-if [[ $READY_NODES != 6 ]]; then
+if [[ $READY_NODES != 4 ]]; then
     echo "Not all nodes up ${READY_NODES}/6"
     exit 1
 fi
@@ -79,7 +79,7 @@ if [[ $WORKER_NODES != 3 ]]; then
 fi
 
 MASTER_NODES=$(echo "$NODES" | grep -c kind-control-plane)
-if [[ $MASTER_NODES != 3 ]]; then
+if [[ $MASTER_NODES != 1 ]]; then
     echo "Not enough worker nodes ${MASTER_NODES}/3"
     exit 1
 fi
