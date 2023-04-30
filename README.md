@@ -47,9 +47,9 @@ Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) d
 
 ## Bugs/Limitation
 
-* Currently it works when running a cluster with one master, The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
-* It all works find, but doesn't work on OSX (can't push to local docker registry from osx)
-* For OSX there is the trick of running all this on ```dind``` (Docker in docker) - that's a linux image that allows you to run a docker server inside a docker container.
+* Currently it works on Linux - when running a cluster with one master, The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
+* There is a problem on OSX (can't push to local docker registry from OSX, when docker desktop for OSX is installed§)
+* For OSX there is the trick of running all this on ```dind``` (Docker in docker) - that's a linux docker image that allows you to run a docker server inside a docker container.
 To do so: clone the project, change to project directory, then run the following (beware: the ```dind``` container is run in privileged mode)
 ```
 docker run --privileged -v $PWD:/mystuff -d --name dind-test docker:dind
