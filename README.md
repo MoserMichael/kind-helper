@@ -28,7 +28,7 @@ Requires ```python3``` and ```docker``` to be installed.
 
 ## Example usage 
 
-* Start a kind cluster with 1 master node and 3 worker nodes; local registry of cluster starts at port 5000 ```./kind_helper.py --start --workers 3 --master 1 --verbose  --registry-port 5000```
+* Start a kind cluster with 1 master node and 3 worker nodes; local registry of cluster starts at port 5000 ```./kind_helper.py --start --workers 3`` --master 1 --verbose  --registry-port 5000```
 * Run the kubectl command 'kubectl get nodes' with the kind clusters context ```./kind_helper.py -c 'get nodes'```
 * run a shell on node kind-control-plane of the cluster ```./kind_helper.py --node kind-control-plane```
 * stop the cluster & local registry ```./kind_helper.py --stop```
@@ -45,6 +45,19 @@ Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) d
 
 `make test` will run all the tests.
 
+## Bugs/Limitation
+
+* Currently it works when running a cluster with one master, The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
+* It all works find, but doesn't work on OSX (can't push to local docker registry from osx)
+* For OSX there is the trick of running all this on ```dind``` (Docker in docker) - that's a linux image that allows you to run a docker server inside a docker container.
+To do so: clone the project, change to project directory, then run the following (beware: the ```dind``` container is run in privileged mode)
+```
+docker run --privileged -v $PWD:/mystuff -d --name dind-test docker:dind
+docker exec -it dind-test /bin/sh
+apk update
+apk add bash python3 jq curl make
+make test 
+```
 
 ## Command line reference
 
