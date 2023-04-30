@@ -489,10 +489,10 @@ It runs a local docker registry and can be used
     group.add_argument('--start', '-s', action='store_true', default=False, dest='isstart',\
             help='start k8s kind cluster & local docker registry')
 
-    group.add_argument('--masters', '-m', type=int, default=3, dest='num_masters',\
+    group.add_argument('--masters', '-m', type=int, default=1, dest='num_masters',\
             help='number of master nodes')
 
-    group.add_argument('--workers', '-w', type=int, default=0, dest='num_workers',\
+    group.add_argument('--workers', '-w', type=int, default=1, dest='num_workers',\
             help='number of worker nodes')
 
     group.add_argument('--timeout', '-t', type=int, default="120", \
