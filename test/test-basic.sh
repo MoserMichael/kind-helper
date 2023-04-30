@@ -58,8 +58,8 @@ if [[ $WORKER_NODES != 3 ]]; then
 fi
 
 MASTER_NODES=$(echo "$NODES" | grep -c kind-control-plane)
-if [[ $MASTER_NODES != 3 ]]; then
-    echo "Not enough worker nodes ${MASTER_NODES}/3"
+if [[ $MASTER_NODES != 1 ]]; then
+    echo "Not enough worker nodes ${MASTER_NODES}/1"
     exit 1
 fi
 
