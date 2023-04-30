@@ -46,8 +46,8 @@ trap "cleanup" EXIT SIGINT
 NODES=$(./kind_helper.py -c 'get nodes')
 
 READY_NODES=$(echo "$NODES" | grep -c Ready)
-if [[ $READY_NODES != 6 ]]; then
-    echo "Not all nodes up ${READY_NODES}/6"
+if [[ $READY_NODES != 4 ]]; then
+    echo "Not all nodes up ${READY_NODES}"
     exit 1
 fi
 
