@@ -1,3 +1,6 @@
+[Continuous integration test status](https://github.com/MoserMichael/kind-helper/actions/workflows/c-cpp.yml/badge.svg)
+
+<hr>
 
 ## Introduction
 
@@ -14,9 +17,8 @@ The following steps are done by kind\_helper.py when creating a test cluster:
 1. the script first downloads kind and kubectl (if these are not present in the path)
 2. starts a local docker registry 
 3. creates a kind cluster with desired number of master and worker nodes that is connected to the local docker registry. Any docker image pushed to this registry is available from within the test cluster.
-4. download kubeconfig for working with kind cluster
-5. script waits for all nodes to become ready
-6. If command line option --ingress option is present, then create the ingress deployment and start the nginx load balancer on the first worker node (requires to have at least one worker node in the cluster). 
+4. script waits for all nodes to become ready
+5. If command line option --ingress option is present, then create the ingress deployment and start the NGINX load balancer/ingress controller on the first master node. See example test with http ingress [test-with-ingress.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-with-ingress.sh), and with https/tls ingress [test-with-ingress-tls.sh](https://github.com/MoserMichael/kind-helper/blob/master/test/test-with-ingress-tls.sh)   
 
 The kind\_helper.py script requires the presence of docker and python3.
 
