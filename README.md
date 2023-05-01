@@ -43,6 +43,8 @@ Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) d
 
 ## setup 
 
+Download the python script script [kind_helper.py](https://raw.githubusercontent.com/MoserMichael/kind-helper/master/kind_helper.py)
+
 Requires ```python3```, ```docker``` and ```bash``` to be installed. 
 
 ```kubectl``` and ```kind``` are downloaded by the script, if not present.
