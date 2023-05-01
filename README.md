@@ -1,4 +1,4 @@
-[Continuous integration test status](https://github.com/MoserMichael/kind-helper/actions/workflows/c-cpp.yml/badge.svg)
+![Continuous integration test status](https://github.com/MoserMichael/kind-helper/actions/workflows/c-cpp.yml/badge.svg)
 
 <hr>
 
