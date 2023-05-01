@@ -49,7 +49,8 @@ Requires ```python3```, ```docker``` and ```bash``` to be installed.
 
 ## Bugs/Limitation
 
-* Currently it works on Linux - when running a cluster with one master, The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
+* Currently it works on Linux - when running a cluster with one master
+* When running an ingress: it works with one master node. The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
 * There is a problem on OSX (can't push to local docker registry from OSX, when docker desktop for OSX is installed§)
 * For OSX there is the trick of running all this on ```dind``` (Docker in docker) - that's a linux docker image that allows you to run a docker server inside a docker container.
 To do so: clone the project, change to project directory, then run the following (beware: the ```dind``` container is run in privileged mode)
