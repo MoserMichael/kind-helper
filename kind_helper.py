@@ -516,7 +516,7 @@ first is the port visible from outside the cluster, second is the port inside th
             help='if kind or kubectl tools not found then try to download to this directory')
 
     plat_opt = group.add_argument('--plat', '-l', type=str, dest='platform', default="amd64", \
-            help='platform id for downloading kind and curl (if needed)')
+            help='platform id for downloading kind and kubectl (if needed)')
 
     verbose_opt = group.add_argument('--verbose', '-v', action='store_true', default=False, \
             dest='verbose', help='verbose output')

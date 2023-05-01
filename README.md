@@ -20,12 +20,6 @@ The following steps are done by kind\_helper.py when creating a test cluster:
 
 The kind\_helper.py script requires the presence of docker and python3.
 
-## setup 
-
-Requires ```python3``` and ```docker``` to be installed. 
-
-```kubectl``` and ```kind``` are downloaded by the script, if not present.
-
 ## Example usage 
 
 * Start a kind cluster with 1 master node and 3 worker nodes; local registry of cluster starts at port 5000 ```./kind_helper.py --start --workers 3`` --master 1 --verbose  --registry-port 5000```
@@ -45,6 +39,12 @@ Also see [test/](https://github.com/MoserMichael/kind-helper/tree/master/test) d
 
 `make test` will run all the tests.
 
+## setup 
+
+Requires ```python3```, ```docker``` and ```bash``` to be installed. 
+
+```kubectl``` and ```kind``` are downloaded by the script, if not present.
+
 ## Bugs/Limitation
 
 * Currently it works on Linux - when running a cluster with one master, The problem is that the deployment of the ingress controller is ignoring the ```ingress-ready``` node selector.
@@ -54,6 +54,7 @@ To do so: clone the project, change to project directory, then run the following
 ```
 docker run --privileged -v $PWD:/mystuff -d --name dind-test docker:dind
 docker exec -it dind-test /bin/sh
+# while running inside the container
 apk update
 apk add bash python3 jq curl make
 make test 
@@ -75,16 +76,16 @@ usage: kind_helper.py [-h] [--start] [--masters NUM_MASTERS]
 This program automates creation of useful k8s clusters by means of utilising
 the kind utility. It runs a local docker registry and can be used
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
 
 Start the cluster:
   --start, -s           start k8s kind cluster & local docker registry
                         (default: False)
   --masters NUM_MASTERS, -m NUM_MASTERS
-                        number of master nodes (default: 3)
+                        number of master nodes (default: 1)
   --workers NUM_WORKERS, -w NUM_WORKERS
-                        number of worker nodes (default: 0)
+                        number of worker nodes (default: 1)
   --timeout TIMEOUT, -t TIMEOUT
                         timeout while waiting for nodes to become ready
                         (default: 120)
@@ -100,9 +101,10 @@ Start the cluster:
                         cluster (default: )
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
-                        download to this directory (default: $HOME/tmp-dir)
+                        download to this directory (default: $HOME/kind-tmp-
+                        dir)
   --plat PLATFORM, -l PLATFORM
-                        platform id for downloading kind and curl (if needed)
+                        platform id for downloading kind and kubectl (if needed)
                         (default: amd64)
   --verbose, -v         verbose output (default: False)
 
@@ -111,9 +113,10 @@ Stop the cluster:
                         (default: False)
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
-                        download to this directory (default: $HOME/tmp-dir)
+                        download to this directory (default: $HOME/kind-tmp-
+                        dir)
   --plat PLATFORM, -l PLATFORM
-                        platform id for downloading kind and curl (if needed)
+                        platform id for downloading kind and kubectl (if needed)
                         (default: amd64)
   --verbose, -v         verbose output (default: False)
 
@@ -127,7 +130,8 @@ kubectl wrapper - run kubectl on kind cluster:
                         kubectl with kind cluster config (default: )
   --dir TEMP_DIR, -d TEMP_DIR
                         if kind or kubectl tools not found then try to
-                        download to this directory (default: $HOME/tmp-dir)
+                        download to this directory (default: $HOME/kind-tmp-
+                        dir)
 ```
 
 ## What I learned from this
