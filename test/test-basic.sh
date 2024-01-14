@@ -29,7 +29,7 @@ docker_tag() {
 cleanup() {
     echo "*** cleanup ***"
 
-    ./kind_helper.py -c 'version --short'
+    ./kind_helper.py -c 'version'
     ./kind_helper.py -c 'get events'
 
 

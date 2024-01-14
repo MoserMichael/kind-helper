@@ -31,7 +31,7 @@ docker_tag() {
 cleanup() {
     echo "*** cleanup ***"
     set +e
-    ./kind_helper.py -c 'version --short'
+    ./kind_helper.py -c 'version'
     ./kind_helper.py -c 'get events'
     ./kind_helper.py -c 'get ing'
     ./kind_helper.py -c 'get deployment'
